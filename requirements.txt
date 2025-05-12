@@ -6,6 +6,6 @@ tensorflow>=2.16.0
 pandas==2.2.2
 scipy==1.13.0
 protobuf>=4.25.3,<5
-streamlit-TTS==1.2.0
+streamlit-TTS==0.0.7
 gtts==2.5.3
 uuid==1.30
