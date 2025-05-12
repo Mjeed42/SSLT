@@ -9,3 +9,5 @@ protobuf>=4.25.3,<5
 streamlit-TTS==0.0.7
 gtts==2.5.3
 uuid==1.30
+dotenv
+openai
