@@ -87,7 +87,7 @@ with st.sidebar:
 #---------------------------Load Model-------------------------------
 @st.cache_resource
 def load_model():
-    return joblib.load(r"C:\Users\alras\OneDrive\Documents\fff\SaadAlshahrani\arabic-sign-language-translator\arabic_sign_language_translator\Pages\ssl_hand_gesture_model.pkl")  # Use relative path for deployment
+    return joblib.load(r"/workspaces/SSLT/Pages/ssl_hand_gesture_model.pkl")  # Use relative path for deployment
 
 model = load_model()
 
