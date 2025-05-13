@@ -39,7 +39,7 @@ import streamlit as st
 st.markdown("""
 <style>
 .Main-Title {
-    font-size: 58px;
+    #font-size: 58px;
     font-weight: bold;
     text-align: center;
     background: -webkit-linear-gradient(45deg, #004474, #ff5733, #28a745);
