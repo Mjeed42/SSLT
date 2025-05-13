@@ -1,13 +1,13 @@
 streamlit==1.44.1
 opencv-python==4.11.0.86
 numpy==1.26.4
-mediapipe==0.10.13   # Earlier version known to work better with cloud
-tensorflow==2.15.0
+mediapipe==0.10.21
+tensorflow==2.17.0
 pandas==2.2.3
-protobuf==3.20.3     # Older protobuf to match TensorFlow 2.15.0
-scipy==1.13.0        # Better supported than 1.15.2 on cloud
-joblib==1.5.0
+protobuf==3.20.3
+scikit-learn==1.6.1
+joblib==1.4.2
 gTTS==2.5.4
-streamlit-TTS==0.0.7
+streamlit_TTS==0.0.7
 uuid==1.30
 python-dotenv==1.1.0
