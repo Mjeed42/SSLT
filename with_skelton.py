@@ -1,22 +1,22 @@
+import time
 import streamlit as st
 import cv2
 import numpy as np
-import pandas as pd
-import joblib
 import mediapipe as mp
+from tensorflow.keras.models import load_model
 from collections import deque
+from streamlit_TTS import text_to_speech
 
-#---------------------------Set page configuration------------------------------
+# ----------------------------- Set Page Configuration -----------------------------
 st.set_page_config(
-    page_title="SSLT - Real-Time Saudi Sign Language Translator",
+    page_title="🎙️ SSLT - Saudi Sign Language Translator",
     page_icon="🎙️",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="expanded"
 )
 
-#---------------------------Custom CSS for styling------------------------------
-st.markdown("""
-<style>
+# ----------------------------- Custom CSS for Styling -----------------------------
+st.markdown("""<style>
 .Main-Title {
     font-size: 58px;
     font-weight: bold;
@@ -38,23 +38,36 @@ st.markdown("""
     text-align: center;
     color: gray;
 }
+.Cam-OFF-Text {
+    font-size: 40px;
+    text-align: center;
+    background: -webkit-linear-gradient(45deg, #999, #555);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 </style>
 """, unsafe_allow_html=True)
 
-#---------------------------App Title & Intro-------------------------------
+# ----------------------------- App Title & Intro -----------------------------
 st.markdown("<div class='Main-Title'>🎙️ مترجم لغة الإشارة السعودية (SSLT)</div>", unsafe_allow_html=True)
 st.markdown("---")
 
 st.markdown('<p style="font-size: 24px; text-align: center;">مرحباً بك في تطبيق المترجم الإشاري الفوري!</p>', unsafe_allow_html=True)
 st.markdown('<p style="font-size: 18px; text-align: center;">قم بعرض إيماءة أمام الكاميرا، وسوف يُنطق الكلمة فوراً باللغة العربية.</p>', unsafe_allow_html=True)
 
-#---------------------------Sidebar-------------------------------------
+# ----------------------------- Sidebar Settings -----------------------------
 with st.sidebar:
     st.markdown("<h1 class='SideBar' style='color:orange;'>SSLT</h1>", unsafe_allow_html=True)
     st.markdown("---")
     
     with st.expander("🛠️ الإعدادات", expanded=True):
-        predict_every_n_frames = st.slider("تكرار التنبؤ (كل N إطار)", 1, 120, 10)
+        predict_every_n_frames = st.slider("تكرار التنبؤ (كل N إطار)", 1, 120, 30)
+        show_skeleton = st.checkbox("إظهار هيكل اليد", value=True)
         st.markdown("---")
 
     with st.expander("🪄 كيفية الاستخدام", expanded=True):
@@ -67,23 +80,27 @@ with st.sidebar:
         </ul>
         """, unsafe_allow_html=True)
 
-#---------------------------Load Model-------------------------------
+# ----------------------------- Load Model and Labels -----------------------------
 @st.cache_resource
-def load_model():
-    return joblib.load("ssl_hand_gesture_model.pkl")
+def load_ssl_model():
+    # r"C:\Users\alras\OneDrive\Documents\fff\SaadAlshahrani\models\ssl_hand_gesture_model.pkl"
+    model = load_model(r'C:\Users\alras\OneDrive\Documents\fff\SaadAlshahrani\arabic-sign-language-translator\arabic_sign_language_translator\Pages\ssl_lstm_model3.h5')
+    label_classes = np.load(r'C:\Users\alras\OneDrive\Documents\fff\SaadAlshahrani\arabic-sign-language-translator\arabic_sign_language_translator\Pages\label_classes3.npy', allow_pickle=True)
+    return model, label_classes
 
-model = load_model()
+model, label_classes = load_ssl_model()
 
-labels = ["سنة", "أسبوع", "شهر", "الأربعاء", "الجمعة", "الثلاثاء", "الأثنين", "الأحد", "يوم", "الخميس", "السبت", "لغة الإشارة السعودية"]
+SEQUENCE_LENGTH = 30
+sequence = deque(maxlen=SEQUENCE_LENGTH)
 
-#---------------------------Session State-------------------------------
+# ----------------------------- Session State -----------------------------
 if 'camera_running' not in st.session_state:
     st.session_state.camera_running = False
     st.session_state.prediction = None
     st.session_state.confidence = 0.0
     st.session_state.last_prediction = None
 
-#---------------------------Text-to-Speech Function---------------------------
+# ----------------------------- Text-to-Speech Function -----------------------------
 def speak_prediction(text):
     if text == "..." or text is None or text == st.session_state.last_prediction:
         return
@@ -98,19 +115,17 @@ def speak_prediction(text):
     </script>
     """, unsafe_allow_html=True)
 
-#---------------------------MediaPipe Setup-----------------------------
+# ----------------------------- MediaPipe Setup -----------------------------
 mp_hands = mp.solutions.hands
-mp_drawing = mp.solutions.drawing_utils
-mp_styles = mp.solutions.drawing_styles
-
 hands = mp_hands.Hands(
     static_image_mode=False,
     max_num_hands=2,
-    min_detection_confidence=0.7,
-    min_tracking_confidence=0.7
+    min_detection_confidence=0.6,
+    min_tracking_confidence=0.5
 )
+mp_drawing = mp.solutions.drawing_utils
 
-#---------------------------Camera Logic-------------------------------
+# ----------------------------- Camera Logic -----------------------------
 video_placeholder = st.empty()
 prediction_placeholder = st.empty()
 
@@ -127,36 +142,49 @@ if st.session_state.camera_running:
         image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = hands.process(image_rgb)
 
-        landmarks = []
+        landmarks_list = []
 
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
-                mp_drawing.draw_landmarks(
-                    frame,
-                    hand_landmarks,
-                    mp_hands.HAND_CONNECTIONS,
-                    mp_styles.get_default_hand_landmarks_style(),
-                    mp_styles.get_default_hand_connections_style()
-                )
+                if show_skeleton:
+                    mp_drawing.draw_landmarks(
+                        frame,
+                        hand_landmarks,
+                        mp_hands.HAND_CONNECTIONS
+                    )
                 for lm in hand_landmarks.landmark:
-                    landmarks.extend([lm.x, lm.y, lm.z])
+                    landmarks_list.extend([lm.x, lm.y, lm.z])
+
+            if len(landmarks_list) == 63:
+                landmarks_list += [0.0] * 63
+
+            if len(landmarks_list) == 126:
+                sequence.append(landmarks_list)
+
+        else:
+            sequence.clear()
 
         prediction = "..."
         confidence = 0.0
 
-        if len(landmarks) == 126:
-            df = pd.DataFrame([landmarks])
-            prediction = model.predict(df)[0]
-            confidence = 1.0  # Replace with predict_proba if available
+        frame_count += 1
+        if len(sequence) == SEQUENCE_LENGTH and frame_count % predict_every_n_frames == 0:
+            input_data = np.expand_dims(np.array(sequence), axis=0).astype(np.float32)
+            prediction_probs = model.predict(input_data, verbose=0)[0]
+            predicted_idx = np.argmax(prediction_probs)
+            prediction = label_classes[predicted_idx]
+            confidence = prediction_probs[predicted_idx]
 
             if prediction != st.session_state.last_prediction:
                 st.session_state.prediction = prediction
                 st.session_state.confidence = confidence
                 speak_prediction(prediction)
 
-        # Show webcam feed
+        # Show webcam feed in a small centered box
         with video_placeholder.container():
-            st.image(frame, channels="BGR", use_container_width=True)
+            col1, col2, col3 = st.columns([1, 2, 1])  # Center alignment
+            with col2:
+                st.image(frame, channels="BGR", width=320)  # Fixed size
 
         # Show prediction + confidence
         with prediction_placeholder.container():
@@ -168,13 +196,11 @@ if st.session_state.camera_running:
                 </p>
                 """, unsafe_allow_html=True)
 
-        frame_count += 1
-
     cap.release()
 else:
-    prediction_placeholder.markdown('<p class="Prediction-Text" style="font-size: 40px; text-align:center;">🔴 الكاميرا معطلة. اضغط تشغيل لبدء التعرف.</p>', unsafe_allow_html=True)
+    prediction_placeholder.markdown('<p class="Cam-OFF-Text" style="font-size: 40px; text-align:center;">🔴 الكاميرا معطلة. اضغط تشغيل لبدء التعرف.</p>', unsafe_allow_html=True)
 
-#---------------------------Camera Controls-------------------------------
+# ----------------------------- Camera Controls -----------------------------
 col1, col2 = st.columns(2)
 with col1:
     if st.button("🎥🟢 تشغيل الكاميرا", key="start_camera", use_container_width=True):
@@ -182,18 +208,18 @@ with col1:
         st.session_state.prediction = None
         st.session_state.confidence = 0.0
         st.session_state.last_prediction = None
+        sequence.clear()
 
 with col2:
     if st.button("🎥🛑 إيقاف الكاميرا", key="stop_camera", use_container_width=True):
         st.session_state.camera_running = False
 
+# ----------------------------- Footer ------------------------------------
 st.markdown("---")
-
-#---------------------------Footer------------------------------------
 st.markdown(
     """
     <footer style="text-align: center; margin-top: 50px;">
-        <p>© 2025 Saudi Sign Language Translator | تم بناؤه باستخدام Streamlit + MediaPipe + Scikit-learn</p>
+        <p>© 2025 Saudi Sign Language Translator | تم بناؤه باستخدام Streamlit + MediaPipe + TensorFlow</p>
     </footer>
     """,
     unsafe_allow_html=True
