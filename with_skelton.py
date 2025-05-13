@@ -20,7 +20,7 @@ def speak_prediction(prediction, lang='ar'):
 
 
 # Load your trained model
-model = keras.models.load_model('3_words_model_new.keras')
+model = keras.models.load_model('3_words_model_halved.keras')
 actions = ['assalam alaikum', 'sabah alkhair', 'kaif alhal']  # Replace with your real class names
 threshold = 0.7  # Minimum confidence to accept prediction
 
