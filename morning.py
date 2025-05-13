@@ -34,6 +34,8 @@ st.set_page_config(
 )
 
 # ----------------------------- Custom CSS for Styling -----------------------------
+import streamlit as st
+
 st.markdown("""
 <style>
 .Main-Title {
@@ -44,6 +46,11 @@ st.markdown("""
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
+
+
+st.markdown("<div class='Main-Title'>🎙️ Arabic Sign Language Translator</div>", unsafe_allow_html=True)
+
 .Prediction-Text {
     font-size: 60px;
     font-weight: bold;
