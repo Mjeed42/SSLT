@@ -15,26 +15,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ----------------------------- Custom CSS for Styling -----------------------------
-st.markdown("""import time
-import streamlit as st
-import cv2
-import numpy as np
-import mediapipe as mp
-from tensorflow.keras.models import load_model
-from collections import deque
-from streamlit_TTS import text_to_speech
-
-# ----------------------------- Set Page Configuration -----------------------------
-st.set_page_config(
-    page_title="🎙️ SSLT - Saudi Sign Language Translator",
-    page_icon="🎙️",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # ----------------------------- Custom CSS for Styling -----------------------------
-import streamlit as st
 
 st.markdown("""
 <style>
