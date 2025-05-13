@@ -18,48 +18,6 @@ st.set_page_config(
 
 # ----------------------------- Custom CSS for Styling -----------------------------
 
-st.markdown("""
-<style>
-.Main-Title {
-    #font-size: 58px;
-    font-weight: bold;
-    text-align: center;
-    background: -webkit-linear-gradient(45deg, #004474, #ff5733, #28a745);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-
-
-st.markdown("<div class='Main-Title'>🎙️ Arabic Sign Language Translator</div>", unsafe_allow_html=True)
-
-.Prediction-Text {
-    font-size: 60px;
-    font-weight: bold;
-    text-align: center;
-    background: -webkit-linear-gradient(45deg, #004474, #ff5733, #28a745);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-.Confidence-Text {
-    font-size: 40px;
-    text-align: center;
-    color: gray;
-}
-.Cam-OFF-Text {
-    font-size: 40px;
-    text-align: center;
-    background: -webkit-linear-gradient(45deg, #999, #555);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-.image-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-</style>
-""", unsafe_allow_html=True)
 
 # ----------------------------- App Title & Intro -----------------------------
 st.markdown("<div class='Main-Title'>🎙️ مترجم لغة الإشارة السعودية (SSLT)</div>", unsafe_allow_html=True)
