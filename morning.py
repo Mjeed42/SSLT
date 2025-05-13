@@ -130,7 +130,7 @@ video_placeholder = st.empty()
 prediction_placeholder = st.empty()
 
 if st.session_state.camera_running:
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     frame_count = 0
 
     while st.session_state.camera_running:
