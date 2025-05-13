@@ -11,3 +11,4 @@ gtts==2.5.3
 uuid==1.30
 dotenv
 openai
+joblib==1.4.0
