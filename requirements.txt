@@ -1,14 +1,12 @@
 streamlit==1.36.0
 opencv-python-headless==4.9.0.80
 numpy==1.26.4
-mediapipe>=0.10.21
+mediapipe>=0.10.13
 tensorflow>=2.16.0
 pandas==2.2.2
-scipy==1.13.0
 protobuf>=4.25.3,<5
+scipy==1.13.0
 streamlit-TTS==0.0.7
 gtts==2.5.3
 uuid==1.30
-dotenv
-openai
-joblib==1.4.0
+python-dotenv
